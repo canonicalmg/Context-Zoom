@@ -8,11 +8,29 @@ from transformers import GPT2Tokenizer
 OPENAI_API_KEY=""
 openai.api_key = OPENAI_API_KEY  
 
+python
+import openai
+import time
+
 def gpt_call(prompt, temperature=0.9, max_retries=3):
+    """
+    Calls the GPT-3.5-turbo model to generate a response based on the given prompt.
+
+    Parameters:
+    - prompt (str): The input prompt for the model.
+    - temperature (float): Controls the randomness of the output. Higher values (e.g., 1.0) make the output more random, while lower values (e.g., 0.2) make it more focused and deterministic. Default is 0.9.
+    - max_retries (int): The maximum number of retries in case of RateLimitError. Default is 3.
+
+    Returns:
+    - str: The generated response from the model, or an empty string if the retry limit is reached.
+    """
+
+    # Define the initial system and user messages
     messages = [
         {"role": "system", "content": "You are summarizeGPT. Specializing in summarizing text."},
         {"role": "user", "content": prompt}
     ]
+
     retries = 0
     while retries < max_retries:
         try:
@@ -22,7 +40,7 @@ def gpt_call(prompt, temperature=0.9, max_retries=3):
                 temperature=temperature,
                 max_tokens=2000,
                 n=1,
-                stop=None,
+                stop=None,  # Stop parameter is not specified, so the model will generate a response until the maximum token limit is reached
             )
             message_content = response.choices[0].message.content.strip()
             return message_content
@@ -30,8 +48,10 @@ def gpt_call(prompt, temperature=0.9, max_retries=3):
             retries += 1
             # Wait for a short duration before retrying
             time.sleep(2)
+
     # Retry limit reached, return an empty string
     return ""
+
 
 def summarize_into_blocks(text, num_blocks, block_size):
     prompt = f"""

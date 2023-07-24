@@ -8,7 +8,20 @@ from transformers import GPT2Tokenizer
 OPENAI_API_KEY=""
 openai.api_key = OPENAI_API_KEY  
 
+
 def gpt_call(prompt, temperature=0.9, max_retries=3):
+    """
+    Call GPT-3.5-turbo to generate a response based on the given prompt.
+
+    Args:
+        prompt (str): The input prompt for GPT-3.5-turbo.
+        temperature (float, optional): Controls the randomness of the response. Defaults to 0.9.
+        max_retries (int, optional): The maximum number of retries in case of rate limit errors. Defaults to 3.
+
+    Returns:
+        str: The generated response from GPT-3.5-turbo.
+    """
+    # Prepare the messages for the GPT-3.5-turbo API call
     messages = [
         {"role": "system", "content": "You are summarizeGPT. Specializing in summarizing text."},
         {"role": "user", "content": prompt}
@@ -22,6 +35,7 @@ def gpt_call(prompt, temperature=0.9, max_retries=3):
                 temperature=temperature,
                 max_tokens=2000,
                 n=1,
+                # Do not stop the response generation at any specific token
                 stop=None,
             )
             message_content = response.choices[0].message.content.strip()
@@ -32,6 +46,7 @@ def gpt_call(prompt, temperature=0.9, max_retries=3):
             time.sleep(2)
     # Retry limit reached, return an empty string
     return ""
+
 
 def summarize_into_blocks(text, num_blocks, block_size):
     prompt = f"""
